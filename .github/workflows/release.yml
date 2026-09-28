@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The tag is the version users see in HACS, so it should match what the bundle logs to the
+      # browser console. A mismatch means a version that cannot be traced back to a build.
+      - name: Check the tag matches package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $pkg" >&2
+            exit 1
+          fi
+
+      - run: npm run build
+
+      # HACS downloads the asset named in hacs.json from the release, so it has to be attached
+      # here - a release without it installs nothing.
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/lg-washing-card.js
+          generate_release_notes: true

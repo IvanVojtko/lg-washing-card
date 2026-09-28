@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Typecheck and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # `npm run build` typechecks first, but running tsc separately means a type error is
+      # reported as its own failed step rather than buried in a bundler log.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npx vite build
+
+      # The bundle is what HACS installs, so a build that silently produces nothing should fail
+      # here rather than at somebody's dashboard.
+      - name: Check the bundle exists and is not empty
+        run: test -s dist/lg-washing-card.js
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lg-washing-card
+          path: dist/lg-washing-card.js
+
+  hacs:
+    name: HACS validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: plugin
