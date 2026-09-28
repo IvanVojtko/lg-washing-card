@@ -96,6 +96,16 @@ reason to prefer it.
 `/opt/has/www` is Home Assistant's own directory on the host, outside the GitOps repo — the same
 place HACS puts the cards it installs.
 
+## Repository settings HACS requires
+
+`hacs/action` validates the GitHub repository itself, not only its contents, and two of its checks
+are settings rather than files — the repository needs a **description** and at least one **topic**.
+A repository without them fails validation however correct the code is. Set once:
+
+```bash
+gh repo edit --description "..." --add-topic home-assistant --add-topic hacs --add-topic lovelace
+```
+
 ## Why `dist/` is committed
 
 HACS resolves a dashboard plugin's file from the repository tree, so a branch with no built bundle
