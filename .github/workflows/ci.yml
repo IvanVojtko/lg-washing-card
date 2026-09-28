@@ -33,6 +33,17 @@ jobs:
       - name: Check the bundle exists and is not empty
         run: test -s dist/lg-washing-card.js
 
+      # dist/ is committed because HACS resolves a plugin's file from the repository tree, which
+      # means the build output and src/ can drift apart silently - the card users install would
+      # stop matching the code being reviewed. Rebuilding and diffing is the only thing that keeps
+      # them honest.
+      - name: Check the committed bundle matches a fresh build
+        run: |
+          if ! git diff --exit-code --stat -- dist/; then
+            echo "::error::dist/ is out of date. Run 'npm run build' and commit the result." >&2
+            exit 1
+          fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: lg-washing-card

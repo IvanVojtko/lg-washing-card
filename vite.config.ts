@@ -15,7 +15,9 @@ export default defineConfig({
         },
         target: 'es2021',
         minify: 'esbuild',
-        sourcemap: true,
+        // Off: the bundle is committed and served as-is, and a map that is not published
+        // alongside it only earns a 404 in every browser that loads the card.
+        sourcemap: false,
         emptyOutDir: true,
     },
 })

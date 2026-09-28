@@ -96,6 +96,18 @@ reason to prefer it.
 `/opt/has/www` is Home Assistant's own directory on the host, outside the GitOps repo — the same
 place HACS puts the cards it installs.
 
+## Why `dist/` is committed
+
+HACS resolves a dashboard plugin's file from the repository tree, so a branch with no built bundle
+in it is not installable — `hacs/action` rejects it as "repository structure not compliant". The
+built `dist/lg-washing-card.js` is therefore in git, as it is for most HACS frontend repositories.
+
+The cost is that the artifact can drift from `src/`, leaving users installing something that does
+not match the code under review. CI rebuilds and diffs `dist/` on every push to stop that, so a
+change to `src/` without a rebuild fails rather than shipping quietly.
+
+Run `npm run build` and commit the result alongside any source change.
+
 ## Releasing
 
 CI typechecks and builds every push and pull request, and validates the repository against HACS.

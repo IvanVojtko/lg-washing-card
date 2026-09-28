@@ -1,3 +1,7 @@
 node_modules/
-dist/
 *.tgz
+
+# dist/ is deliberately committed: HACS resolves a dashboard plugin's file from the repository
+# tree, so the built bundle has to be in git for the branch to be installable at all. CI checks it
+# against a fresh build so it cannot drift from src/.
+dist/*.map
